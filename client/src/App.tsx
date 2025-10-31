@@ -21,6 +21,7 @@ import Settings from './pages/Settings';
 import FAQ from './pages/FAQ';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
+import About from './pages/About';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminReports from './pages/admin/AdminReports';
 import AdminHallOfFame from './pages/admin/AdminHallOfFame';
@@ -50,6 +51,7 @@ function Router() {
       <Route path="/faq" component={FAQ} />
       <Route path="/contact" component={Contact} />
       <Route path="/privacy" component={Privacy} />
+      <Route path="/about" component={About} />
       
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/reports" component={AdminReports} />

@@ -37,16 +37,16 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/writeups">
-                  <a className="text-sm text-muted-foreground hover:text-primary transition-colors" data-testid="link-footer-writeups">
-                    Write-ups
+                <Link href="/leaderboard">
+                  <a className="text-sm text-muted-foreground hover:text-primary transition-colors" data-testid="link-footer-leaderboard">
+                    Leaderboard
                   </a>
                 </Link>
               </li>
               <li>
-                <Link href="/leaderboard">
-                  <a className="text-sm text-muted-foreground hover:text-primary transition-colors" data-testid="link-footer-leaderboard">
-                    Leaderboard
+                <Link href="/halloffame">
+                  <a className="text-sm text-muted-foreground hover:text-primary transition-colors" data-testid="link-footer-halloffame">
+                    Hall of Fame
                   </a>
                 </Link>
               </li>
@@ -56,6 +56,13 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold mb-4">Company</h3>
             <ul className="space-y-2">
+              <li>
+                <Link href="/about">
+                  <a className="text-sm text-muted-foreground hover:text-primary transition-colors" data-testid="link-footer-about">
+                    About
+                  </a>
+                </Link>
+              </li>
               <li>
                 <Link href="/faq">
                   <a className="text-sm text-muted-foreground hover:text-primary transition-colors" data-testid="link-footer-faq">
@@ -74,13 +81,6 @@ export default function Footer() {
                 <Link href="/privacy">
                   <a className="text-sm text-muted-foreground hover:text-primary transition-colors" data-testid="link-footer-privacy">
                     Privacy Policy
-                  </a>
-                </Link>
-              </li>
-              <li>
-                <Link href="/halloffame">
-                  <a className="text-sm text-muted-foreground hover:text-primary transition-colors" data-testid="link-footer-halloffame">
-                    Hall of Fame
                   </a>
                 </Link>
               </li>

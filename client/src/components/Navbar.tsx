@@ -22,6 +22,15 @@ export default function Navbar() {
     setLocation('/');
   };
 
+  const publicLinks = [
+    { path: '/', label: 'Home' },
+    { path: '/ctfs', label: 'CTFs' },
+    { path: '/blogs', label: 'Blogs' },
+    { path: '/leaderboard', label: 'Leaderboard' },
+    { path: '/halloffame', label: 'Hall of Fame' },
+    { path: '/about', label: 'About' },
+  ];
+
   const userLinks = [
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/ctfs', label: 'CTFs' },
@@ -29,6 +38,7 @@ export default function Navbar() {
     { path: '/writeups', label: 'Write-ups' },
     { path: '/leaderboard', label: 'Leaderboard' },
     { path: '/halloffame', label: 'Hall of Fame' },
+    { path: '/about', label: 'About' },
   ];
 
   const adminLinks = [
@@ -36,9 +46,10 @@ export default function Navbar() {
     { path: '/admin/reports', label: 'Reports' },
     { path: '/admin/users', label: 'Users' },
     { path: '/admin/halloffame', label: 'Hall of Fame' },
+    { path: '/about', label: 'About' },
   ];
 
-  const links = user?.role === 'admin' ? adminLinks : userLinks;
+  const links = user ? (user.role === 'admin' ? adminLinks : userLinks) : publicLinks;
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
@@ -54,53 +65,51 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden md:flex items-center gap-6">
-            {user ? (
-              <>
-                {links.map((link) => (
-                  <Link key={link.path} href={link.path}>
-                    <a
-                      className={`text-sm font-medium transition-colors hover:text-primary ${
-                        location === link.path ? 'text-primary' : 'text-muted-foreground'
-                      }`}
-                      data-testid={`link-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      {link.label}
-                    </a>
-                  </Link>
-                ))}
+            {links.map((link) => (
+              <Link key={link.path} href={link.path}>
+                <a
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    location === link.path ? 'text-primary' : 'text-muted-foreground'
+                  }`}
+                  data-testid={`link-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  {link.label}
+                </a>
+              </Link>
+            ))}
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2" data-testid="button-profile-menu">
-                      <Avatar className="w-8 h-8 border border-primary/20">
-                        <AvatarImage src={user.avatar} alt={user.username} />
-                        <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <div className="px-2 py-1.5">
-                      <p className="text-sm font-medium">{user.username}</p>
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile">
-                        <a className="w-full" data-testid="link-profile">Profile</a>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/settings">
-                        <a className="w-full" data-testid="link-settings">Settings</a>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} data-testid="button-logout">
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2" data-testid="button-profile-menu">
+                    <Avatar className="w-8 h-8 border border-primary/20">
+                      <AvatarImage src={user.avatar} alt={user.username} />
+                      <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <div className="px-2 py-1.5">
+                    <p className="text-sm font-medium">{user.username}</p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile">
+                      <a className="w-full" data-testid="link-profile">Profile</a>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href={user.role === 'admin' ? '/admin/settings' : '/settings'}>
+                      <a className="w-full" data-testid="link-settings">Settings</a>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} data-testid="button-logout">
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <>
                 <Link href="/login">
@@ -129,24 +138,25 @@ export default function Navbar() {
 
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
+            {links.map((link) => (
+              <Link key={link.path} href={link.path}>
+                <a
+                  className="block py-2 text-sm font-medium hover:text-primary transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </a>
+              </Link>
+            ))}
+            
             {user ? (
               <>
-                {links.map((link) => (
-                  <Link key={link.path} href={link.path}>
-                    <a
-                      className="block py-2 text-sm font-medium hover:text-primary transition-colors"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {link.label}
-                    </a>
-                  </Link>
-                ))}
                 <Link href="/profile">
                   <a className="block py-2 text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>
                     Profile
                   </a>
                 </Link>
-                <Link href="/settings">
+                <Link href={user.role === 'admin' ? '/admin/settings' : '/settings'}>
                   <a className="block py-2 text-sm font-medium hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>
                     Settings
                   </a>

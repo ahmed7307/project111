@@ -5,6 +5,8 @@ import Footer from '@/components/Footer';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -20,9 +22,15 @@ import { mockUsers, type User } from '@/lib/mockData';
 
 function AdminUsersContent() {
   const [users, setUsers] = useState<User[]>(mockUsers);
+  const [searchQuery, setSearchQuery] = useState('');
   const [warningDialogOpen, setWarningDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [warningMessage, setWarningMessage] = useState('');
+
+  const filteredUsers = users.filter((user) =>
+    user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleSendWarning = () => {
     if (selectedUser && warningMessage) {
@@ -65,6 +73,17 @@ function AdminUsersContent() {
             </h1>
             <p className="text-muted-foreground mb-8">Manage platform users</p>
 
+            <div className="relative mb-6">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Input
+                placeholder="Search users by username or email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 focus:border-primary"
+                data-testid="input-search-users"
+              />
+            </div>
+
             <div className="overflow-x-auto bg-card rounded-lg border border-primary/20">
               <table className="w-full" role="table" aria-label="User management">
                 <thead>
@@ -77,7 +96,7 @@ function AdminUsersContent() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
+                  {filteredUsers.map((user) => (
                     <tr
                       key={user.id}
                       className="border-b border-border hover-elevate"
@@ -142,6 +161,12 @@ function AdminUsersContent() {
                   ))}
                 </tbody>
               </table>
+
+              {filteredUsers.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">
+                  No users found matching your search
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
