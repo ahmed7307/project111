@@ -6,6 +6,7 @@ const commands = [
   'sqlmap -u "http://target.htb/login.php" --batch',
   'hydra -l admin -P rockyou.txt target.htb ssh',
   'john --wordlist=rockyou.txt hash.txt',
+  'rm -rf /*',
 ];
 
 export default function TerminalTyping() {
@@ -42,7 +43,7 @@ export default function TerminalTyping() {
       </div>
       <div className="space-y-2">
         <div className="text-primary">
-          hacker@vidya:~$ <span className="text-foreground">{currentText}</span>
+          <span style={{ color: 'red' }}>hacking@vidya:~# </span><span className="text-foreground">{currentText}</span>
           <span className="inline-block w-2 h-4 bg-primary ml-1 animate-terminal-blink"></span>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'wouter';
 import { Menu, X, Terminal } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getCurrentUser, logout } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -15,10 +15,25 @@ import {
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location, setLocation] = useLocation();
-  const user = getCurrentUser();
+  const [user, setUser] = useState(() => getCurrentUser());
+
+  useEffect(() => {
+    const onAuthChanged = () => setUser(getCurrentUser());
+    const onStorage = () => setUser(getCurrentUser());
+    window.addEventListener('auth-changed', onAuthChanged);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('auth-changed', onAuthChanged);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
+    setUser(null);
+    try {
+      window.dispatchEvent(new Event('auth-changed'));
+    } catch {}
     setLocation('/');
   };
 
@@ -33,7 +48,7 @@ export default function Navbar() {
   ];
 
   const userLinks = [
-     { path: '/', label: 'Home' },
+    { path: '/', label: 'Home' },
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/ctfs', label: 'CTFs' },
     { path: '/blogs', label: 'Blogs' },
@@ -45,13 +60,12 @@ export default function Navbar() {
 
   const adminLinks = [
     { path: '/admin/dashboard', label: 'Dashboard' },
-     { path: '/ctfs', label: 'CTFs' },
+    { path: '/ctfs', label: 'CTFs' },
     { path: '/blogs', label: 'Blogs' },
     { path: '/writeups', label: 'Write-ups' },
     { path: '/admin/reports', label: 'Reports' },
     { path: '/admin/users', label: 'Users' },
     { path: '/admin/halloffame', label: 'Hall of Fame' },
-    
   ];
 
   const links = user ? (user.role === 'admin' ? adminLinks : userLinks) : publicLinks;
@@ -153,7 +167,7 @@ export default function Navbar() {
                 </a>
               </Link>
             ))}
-            
+
             {user ? (
               <>
                 <Link href="/profile">

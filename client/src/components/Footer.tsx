@@ -101,7 +101,7 @@ export default function Footer() {
                 <SiDiscord className="w-6 h-6" />
               </a>
               <a
-                href="https://github.com/hackingvidya"
+                href="https://github.com/hackingvidhya6523/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
