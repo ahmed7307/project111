@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Search, Plus } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import WriteupCard from '@/components/WriteupCard';
+import WriteupPreview from '@/components/WriteupPreview';
 import AdminControls from '@/components/AdminControls';
 import WriteupFormModal from '@/components/WriteupFormModal';
 import { addWriteup, getWriteups } from '@/lib/ctfdClient';
@@ -145,7 +145,7 @@ export default function WriteupList() {
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                     className="relative group"
                   >
-                    <WriteupCard {...writeup} />
+                    <WriteupPreview {...writeup} />
                     {isAdmin() && (
                       <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                         <AdminControls

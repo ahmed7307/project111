@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Search, Plus } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import BlogCard from '@/components/BlogCard';
+import BlogPreview from '@/components/BlogPreview';
 import AdminControls from '@/components/AdminControls';
 import BlogFormModal from '@/components/BlogFormModal';
 import { addBlog, getBlogs } from '@/lib/ctfdClient';
@@ -112,7 +112,7 @@ export default function BlogList() {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="relative group"
                 >
-                  <BlogCard {...blog} />
+                  <BlogPreview {...blog} />
                   {isAdmin() && (
                     <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                       <AdminControls

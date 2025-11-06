@@ -1,31 +1,23 @@
 import { useLocation } from 'wouter';
-import { getCurrentUser } from '@/lib/auth';
 import { useEffect } from 'react';
+import { useSession } from '@/lib/session';
 
 interface GuestRouteProps {
   children: React.ReactNode;
 }
 
 export default function GuestRoute({ children }: GuestRouteProps) {
-  const [, setLocation] = useLocation();
-  const user = getCurrentUser();
+  const [location, setLocation] = useLocation();
+  const { user, loading } = useSession();
 
   useEffect(() => {
-    // If user is already logged in, redirect them to appropriate dashboard
-    if (user) {
-      if (user.role === 'admin') {
-        setLocation('/admin/dashboard');
-      } else {
-        setLocation('/dashboard');
-      }
+    if (!loading && user) {
+      const target = '/profile';
+      if (location !== target) setLocation(target);
     }
-  }, [user, setLocation]);
+  }, [user, loading, location, setLocation]);
 
-  // If user is logged in, don't render the page (they're being redirected)
-  if (user) {
-    return null;
-  }
-
-  // User is not logged in, show the login/register page
+  if (loading) return null;
+  if (user) return null;
   return <>{children}</>;
 }
