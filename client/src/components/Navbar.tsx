@@ -15,7 +15,7 @@ import {
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location, setLocation] = useLocation();
-  const { user, logout } = useSession();
+  const { user, logout, loading } = useSession();
 
   const handleLogout = async () => {
     await logout();
@@ -82,7 +82,15 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {user ? (
+            {loading ? (
+              <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                <span className="relative inline-flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+                Loading...
+              </div>
+            ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2" data-testid="button-profile-menu">

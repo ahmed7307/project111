@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import toast from 'react-hot-toast';
+import MarkdownEditor from '@/components/MarkdownEditor';
 
 interface BlogFormData {
   id?: string;
@@ -126,13 +127,11 @@ export default function BlogFormModal({
 
           <div className="space-y-2">
             <Label htmlFor="content">Content (Markdown) *</Label>
-            <textarea
-              id="content"
+            <MarkdownEditor
               value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              required
+              onChange={(v) => setFormData({ ...formData, content: v })}
               placeholder="Write your blog post content here..."
-              className="w-full min-h-[250px] px-3 py-2 border border-input rounded-md bg-background font-mono text-sm"
+              minHeight={260}
             />
           </div>
 

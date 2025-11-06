@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import toast from 'react-hot-toast';
+import MarkdownEditor from '@/components/MarkdownEditor';
 
 interface WriteupFormData {
   id?: string;
@@ -164,13 +165,11 @@ export default function WriteupFormModal({
 
           <div className="space-y-2">
             <Label htmlFor="content">Content (Markdown) *</Label>
-            <textarea
-              id="content"
+            <MarkdownEditor
               value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              required
+              onChange={(v) => setFormData({ ...formData, content: v })}
               placeholder="Write your detailed walkthrough here..."
-              className="w-full min-h-[200px] px-3 py-2 border border-input rounded-md bg-background font-mono text-sm"
+              minHeight={240}
             />
           </div>
 
