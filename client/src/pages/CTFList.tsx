@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Plus } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -6,7 +6,8 @@ import Footer from '@/components/Footer';
 import CTFCard from '@/components/CTFCard';
 import AdminControls from '@/components/AdminControls';
 import CTFFormModal from '@/components/CTFFormModal';
-import { mockCTFs } from '@/lib/mockData';
+import { fetchChallenges, fetchSolves } from '@/lib/ctfdClient';
+import FlagModal from '@/components/FlagModal';
 import { isAdmin } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,10 +22,31 @@ import toast from 'react-hot-toast';
 export default function CTFList() {
   const [filter, setFilter] = useState<'All' | 'Easy' | 'Medium' | 'Hard'>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [ctfs, setCtfs] = useState(mockCTFs);
+  const [ctfs, setCtfs] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCTF, setEditingCTF] = useState<any>(null);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+  const [attemptTarget, setAttemptTarget] = useState<{ id: number; name: string } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [data, solved] = await Promise.all([fetchChallenges(), fetchSolves().catch(() => [])]);
+        const normalized = data.map((d) => ({
+          id: String(d.id),
+          title: d.name,
+          description: d.description || '',
+          category: d.category,
+          difficulty: 'Medium',
+          value: d.value,
+          solved: solved.includes(d.id),
+        }));
+        setCtfs(normalized);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, []);
 
   const filteredCTFs = ctfs.filter((ctf) => {
     const matchesDifficulty = filter === 'All' || ctf.difficulty === filter;
@@ -139,7 +161,7 @@ export default function CTFList() {
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                     className="relative group"
                   >
-                    <CTFCard {...ctf} />
+                    <CTFCard {...ctf} onAttempt={() => setAttemptTarget({ id: Number(ctf.id), name: ctf.title })} />
                     {isAdmin() && (
                       <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                         <AdminControls
@@ -164,6 +186,12 @@ export default function CTFList() {
         onSave={handleSave}
         initialData={editingCTF}
         mode={modalMode}
+      />
+      <FlagModal
+        open={!!attemptTarget}
+        onClose={() => setAttemptTarget(null)}
+        challengeId={attemptTarget?.id || 0}
+        challengeName={attemptTarget?.name}
       />
     </div>
   );

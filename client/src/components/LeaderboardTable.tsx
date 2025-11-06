@@ -1,3 +1,30 @@
+type Entry = { rank: number; name: string; score: number };
+
+export default function LeaderboardTable({ entries }: { entries: Entry[] }) {
+  return (
+    <div className="overflow-x-auto rounded-lg border border-primary/20">
+      <table className="min-w-full text-sm">
+        <thead className="bg-card/60">
+          <tr>
+            <th className="text-left px-4 py-2">Rank</th>
+            <th className="text-left px-4 py-2">User</th>
+            <th className="text-left px-4 py-2">Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          {entries.map((e) => (
+            <tr key={e.rank} className="odd:bg-background even:bg-card/40">
+              <td className="px-4 py-2">{e.rank}</td>
+              <td className="px-4 py-2">{e.name}</td>
+              <td className="px-4 py-2">{e.score}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";

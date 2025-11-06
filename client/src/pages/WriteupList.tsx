@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import WriteupCard from '@/components/WriteupCard';
 import AdminControls from '@/components/AdminControls';
 import WriteupFormModal from '@/components/WriteupFormModal';
-import { mockWriteups } from '@/lib/mockData';
+import { addWriteup, getWriteups } from '@/lib/ctfdClient';
 import { isAdmin } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,7 +21,7 @@ import toast from 'react-hot-toast';
 export default function WriteupList() {
   const [filter, setFilter] = useState<'All' | 'Web' | 'Reversing' | 'Forensics'>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [writeups, setWriteups] = useState(mockWriteups);
+  const [writeups, setWriteups] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingWriteup, setEditingWriteup] = useState<any>(null);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
@@ -56,23 +56,28 @@ export default function WriteupList() {
     }
   };
 
-  const handleSave = (data: any) => {
+  const handleSave = async (data: any) => {
     if (modalMode === 'add') {
-      const newWriteup = {
-        ...data,
-        id: Date.now().toString(),
-        date: new Date().toISOString().split('T')[0],
-        likes: 0,
-        views: 0,
-        authorAvatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.author}`,
-      };
-      setWriteups([newWriteup, ...writeups]);
+      const created = await addWriteup({
+        title: data.title,
+        content: data.content || data.description || '',
+        challengeId: data.challengeId ? Number(data.challengeId) : undefined,
+        challengeName: data.challengeName,
+        author: data.author || 'User',
+        tags: data.tags || [],
+      });
+      setWriteups([created, ...writeups]);
     } else {
-      setWriteups(
-        writeups.map((w) => (w.id === editingWriteup.id ? { ...w, ...data } : w))
-      );
+      setWriteups(writeups.map((w) => (w.id === editingWriteup.id ? { ...w, ...data } : w)));
     }
   };
+
+  useState(() => {
+    (async () => {
+      const list = await getWriteups();
+      setWriteups(list as any);
+    })();
+  });
 
   return (
     <div className="flex flex-col min-h-screen">

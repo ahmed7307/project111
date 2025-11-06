@@ -5,10 +5,27 @@ import { Trophy, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { mockLeaderboard } from '@/lib/mockData';
+import { useEffect, useState } from 'react';
+import { fetchLeaderboard } from '@/lib/ctfdClient';
+import { useSession } from '@/lib/session';
 
 export default function Leaderboard() {
-  
+  const [rows, setRows] = useState<{ rank: number; name: string; score: number }[]>([]);
+  const { user } = useSession();
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const data = await fetchLeaderboard();
+        if (mounted) setRows(data);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    load();
+    const t = setInterval(load, 30000);
+    return () => { mounted = false; clearInterval(t); };
+  }, []);
   const getTrendIcon = (change: string) => {
     if (change === "up") return <TrendingUp className="w-4 h-4 text-green-500" />;
     if (change === "down") return <TrendingDown className="w-4 h-4 text-red-500" />;
@@ -46,7 +63,7 @@ export default function Leaderboard() {
           </motion.div>
 
           {/* Top 3 Podium */}
-          {mockLeaderboard.length > 0 && (
+          {rows.length > 2 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -62,13 +79,13 @@ export default function Leaderboard() {
                     </Badge>
                     <Avatar className="w-20 h-20 mx-auto border-4 border-gray-400/30">
                       <AvatarFallback className="bg-accent text-primary text-2xl">
-                        {mockLeaderboard[1].username.substring(0, 2).toUpperCase()}
+                        {rows[1].name.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-bold text-lg">{mockLeaderboard[1].username}</h3>
+                      <h3 className="font-bold text-lg">{rows[1].name}</h3>
                       <p className="text-2xl font-bold text-primary mt-2">
-                        {mockLeaderboard[1].xp.toLocaleString()}
+                        {rows[1].score.toLocaleString()}
                       </p>
                       <p className="text-sm text-muted-foreground">XP</p>
                     </div>
@@ -128,7 +145,7 @@ export default function Leaderboard() {
           )}
 
           {/* Full Leaderboard Table */}
-          {mockLeaderboard.length > 0 && (
+          {rows.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -161,19 +178,19 @@ export default function Leaderboard() {
                               <div className="flex items-center space-x-3">
                                 <Avatar>
                                   <AvatarFallback className="bg-accent text-primary">
-                                    {entry.username.substring(0, 2).toUpperCase()}
+                        {entry.name.substring(0, 2).toUpperCase()}
                                   </AvatarFallback>
                                 </Avatar>
-                                <span className="font-medium">{entry.username}</span>
+                                <span className={`font-medium ${user?.name === entry.name ? 'text-primary' : ''}`}>{entry.name}</span>
                               </div>
                             </td>
                             <td className="p-4">
                               <span className="font-bold text-primary">
-                                {entry.xp.toLocaleString()}
+                                {entry.score.toLocaleString()}
                               </span>
                             </td>
                             <td className="p-4">
-                              <span className="text-muted-foreground">{entry.completedRooms}</span>
+                              <span className="text-muted-foreground">—</span>
                             </td>
                           </tr>
                         ))}

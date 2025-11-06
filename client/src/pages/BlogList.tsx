@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import BlogCard from '@/components/BlogCard';
 import AdminControls from '@/components/AdminControls';
 import BlogFormModal from '@/components/BlogFormModal';
-import { mockBlogs } from '@/lib/mockData';
+import { addBlog, getBlogs } from '@/lib/ctfdClient';
 import { isAdmin } from '@/lib/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ import toast from 'react-hot-toast';
 
 export default function BlogList() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [blogs, setBlogs] = useState(mockBlogs);
+  const [blogs, setBlogs] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState<any>(null);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
@@ -43,27 +43,27 @@ export default function BlogList() {
     }
   };
 
-  const handleSave = (data: any) => {
+  const handleSave = async (data: any) => {
     if (modalMode === 'add') {
-      const newBlog = {
-        ...data,
-        id: Date.now().toString(),
-        date: new Date().toISOString().split('T')[0],
-        likes: 0,
-        comments: 0,
-        views: 0,
-        tags: data.category ? [data.category] : ['Tutorial'],
-        authorAvatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.author}`,
-        thumbnail: data.image || '',
-        excerpt: data.excerpt,
-      };
-      setBlogs([newBlog, ...blogs]);
+      const created = await addBlog({
+        title: data.title,
+        content: data.content || data.excerpt || '',
+        category: data.category,
+        author: data.author || 'Admin',
+      });
+      setBlogs([created, ...blogs]);
     } else {
-      setBlogs(
-        blogs.map((b) => (b.id === editingBlog.id ? { ...b, ...data, tags: data.category ? [data.category] : b.tags } : b))
-      );
+      setBlogs(blogs.map((b) => (b.id === editingBlog.id ? { ...b, ...data } : b)));
     }
   };
+
+  // Load blogs from local storage/seed
+  useState(() => {
+    (async () => {
+      const list = await getBlogs();
+      setBlogs(list as any);
+    })();
+  });
 
   return (
     <div className="flex flex-col min-h-screen">

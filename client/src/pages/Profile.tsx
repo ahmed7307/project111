@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 import { Link } from 'wouter';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { getCurrentUser } from '@/lib/auth';
+import { useEffect, useState } from 'react';
+import { currentUser } from '@/lib/ctfdClient';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,8 +13,13 @@ import { Trophy, Target, Flame, Settings } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 function ProfileContent() {
-  const user = getCurrentUser();
-
+  const [user, setUser] = useState<any>(null);
+  useEffect(() => {
+    (async () => {
+      const me = await currentUser();
+      setUser(me);
+    })();
+  }, []);
   if (!user) return null;
 
   const isAdmin = user.role === 'admin';
@@ -32,14 +38,14 @@ function ProfileContent() {
             <Card className="border-primary/20 mb-8">
               <CardContent className="p-8">
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                  <Avatar className="w-24 h-24 border-2 border-primary/40">
-                    <AvatarImage src={user.avatar} alt={user.username} />
-                    <AvatarFallback className="text-2xl">{user.username[0].toUpperCase()}</AvatarFallback>
+                    <Avatar className="w-24 h-24 border-2 border-primary/40">
+                    <AvatarImage src={user?.avatar_url} alt={user?.name} />
+                    <AvatarFallback className="text-2xl">{(user?.name || 'U')[0].toUpperCase()}</AvatarFallback>
                   </Avatar>
 
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h1 className="font-serif text-3xl font-bold">{user.username}</h1>
+                      <h1 className="font-serif text-3xl font-bold">{user?.name}</h1>
                       <Badge variant="outline" className="bg-primary/20 text-primary border-primary/40">
                         {isAdmin ? 'Administrator' : 'Advanced'}
                       </Badge>

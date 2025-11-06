@@ -9,9 +9,11 @@ interface CTFCardProps {
   description: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   category: string;
-  rating: number;
-  players: number;
-  tags: string[];
+  rating?: number;
+  players?: number;
+  tags?: string[];
+  solved?: boolean;
+  onAttempt?: () => void;
 }
 
 const difficultyColors = {
@@ -20,10 +22,9 @@ const difficultyColors = {
   Hard: 'bg-destructive/20 text-destructive border-destructive/40',
 };
 
-export default function CTFCard({ id, title, description, difficulty, category, rating, players, tags }: CTFCardProps) {
+export default function CTFCard({ id, title, description, difficulty, category, rating = 5, players = 0, tags = [], solved, onAttempt }: CTFCardProps) {
   return (
-    <Link href={`/ctf/${id}`}>
-      <a data-testid={`card-ctf-${id}`}>
+    <div data-testid={`card-ctf-${id}`}>
         <Card className="border-primary/20 hover-elevate transition-all duration-300 h-full">
           <CardHeader>
             <div className="flex items-start justify-between gap-2 mb-2">
@@ -52,10 +53,22 @@ export default function CTFCard({ id, title, description, difficulty, category, 
                   {tag}
                 </Badge>
               ))}
+              {solved && (
+                <Badge variant="outline" className="text-xs bg-emerald-500/15 text-emerald-400 border-emerald-500/30">Completed</Badge>
+              )}
             </div>
+            {onAttempt && (
+              <div className="mt-4">
+                <Link href={`/ctf/${id}`}>
+                  <a className="text-primary hover:underline mr-4">Details</a>
+                </Link>
+                <button className="text-xs px-2 py-1 rounded bg-primary/20 text-primary border border-primary/30" onClick={onAttempt}>
+                  Submit Flag
+                </button>
+              </div>
+            )}
           </CardContent>
         </Card>
-      </a>
-    </Link>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'wouter';
 import { Menu, X, Terminal } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { getCurrentUser, logout } from '@/lib/auth';
+import { useSession } from '@/lib/session';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -15,26 +15,11 @@ import {
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location, setLocation] = useLocation();
-  const [user, setUser] = useState(() => getCurrentUser());
+  const { user, logout } = useSession();
 
-  useEffect(() => {
-    const onAuthChanged = () => setUser(getCurrentUser());
-    const onStorage = () => setUser(getCurrentUser());
-    window.addEventListener('auth-changed', onAuthChanged);
-    window.addEventListener('storage', onStorage);
-    return () => {
-      window.removeEventListener('auth-changed', onAuthChanged);
-      window.removeEventListener('storage', onStorage);
-    };
-  }, []);
-
-  const handleLogout = () => {
-    logout();
-    setUser(null);
-    try {
-      window.dispatchEvent(new Event('auth-changed'));
-    } catch {}
-    setLocation('/');
+  const handleLogout = async () => {
+    await logout();
+    setLocation('/login');
   };
 
   const publicLinks = [
@@ -102,15 +87,15 @@ export default function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2" data-testid="button-profile-menu">
                     <Avatar className="w-8 h-8 border border-primary/20">
-                      <AvatarImage src={user.avatar} alt={user.username} />
-                      <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
+                      <AvatarImage src={user?.avatar_url} alt={user?.name} />
+                      <AvatarFallback>{(user?.name || 'U')[0].toUpperCase()}</AvatarFallback>
                     </Avatar>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium">{user.username}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                    <p className="text-sm font-medium">{user?.name}</p>
+                    {user?.email && <p className="text-xs text-muted-foreground">{user.email}</p>}
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>

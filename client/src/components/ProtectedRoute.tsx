@@ -1,6 +1,6 @@
 import { useLocation } from 'wouter';
-import { getCurrentUser } from '@/lib/auth';
 import { useEffect } from 'react';
+import { useSession } from '@/lib/session';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,30 +9,17 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
   const [, setLocation] = useLocation();
-  const user = getCurrentUser();
+  const { user, loading } = useSession();
 
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       setLocation('/login');
       return;
     }
+  }, [user, loading, requireAdmin, setLocation]);
 
-    if (requireAdmin && user.role !== 'admin') {
-      setLocation('/dashboard');
-      return;
-    }
-
-    if (!requireAdmin && user.role === 'admin' && window.location.pathname === '/dashboard') {
-      setLocation('/admin/dashboard');
-      return;
-    }
-  }, [user, requireAdmin, setLocation]);
-
+  if (loading) return null;
   if (!user) {
-    return null;
-  }
-
-  if (requireAdmin && user.role !== 'admin') {
     return null;
   }
 

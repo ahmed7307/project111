@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { login } from '@/lib/auth';
+import { useSession } from '@/lib/session';
 import toast from 'react-hot-toast';
 import { Terminal } from 'lucide-react';
 
 export default function Login() {
   const [, setLocation] = useLocation();
+  const { login } = useSession();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -19,12 +20,12 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    const user = login(username, password);
+    const ok = await login(username, password);
 
-    if (user) {
-      toast.success(`Welcome back, ${user.username}!`);
+    if (ok) {
+      toast.success(`Welcome back, ${username}!`);
       setTimeout(() => {
-        setLocation('/dashboard');
+        setLocation('/profile');
       }, 500);
     } else {
       toast.error('Invalid credentials');
@@ -105,11 +106,7 @@ export default function Login() {
               </Link>
             </div>
 
-            <div className="mt-4 p-4 bg-muted rounded-lg text-sm">
-              <p className="font-semibold mb-2">Demo Credentials:</p>
-              <p className="text-muted-foreground">Username: user</p>
-              <p className="text-muted-foreground">Password: password</p>
-            </div>
+            
 
             <div className="mt-4 text-center">
               <Link href="/admin/login">

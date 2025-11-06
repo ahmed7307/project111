@@ -75,23 +75,20 @@ export async function submitFlag(challengeId: number, submission: string): Promi
 }
 
 export async function login(username: string, password: string): Promise<boolean> {
-  // Use web login route to establish session; requires CSRF header
+  // Use API sessions per requirement
   const csrf = getCsrfTokenFromCookie();
-  const form = new URLSearchParams();
-  form.set("name", username);
-  form.set("password", password);
-  const res = await fetch(`/login`, {
-    method: "POST",
+  const res = await fetch(`/api/v1/sessions`, {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      ...(csrf ? { "CSRF-Token": csrf } : {}),
+      'Content-Type': 'application/json',
+      ...(csrf ? { 'CSRF-Token': csrf } : {}),
     },
-    body: form.toString(),
-    credentials: "include",
-    redirect: "manual",
+    credentials: 'include',
+    body: JSON.stringify({ name: username, password }),
   });
-  // 302 is expected on success; 200 with JSON may indicate error
-  return res.status === 302 || res.ok;
+  if (!res.ok) return false;
+  const json = await res.json();
+  return json?.success === true;
 }
 
 export async function currentUser() {
@@ -99,6 +96,75 @@ export async function currentUser() {
   if (!res.ok) return null;
   const json = await res.json();
   return json?.data ?? null;
+}
+
+export async function logout(): Promise<void> {
+  const csrf = getCsrfTokenFromCookie();
+  await fetch(`/api/v1/sessions`, {
+    method: 'DELETE',
+    headers: csrf ? { 'CSRF-Token': csrf } : undefined,
+    credentials: 'include',
+  });
+}
+
+export async function fetchLeaderboard(): Promise<{ rank: number; name: string; score: number }[]> {
+  const res = await ctfdRequest(`/scoreboard`);
+  if (!res.ok) throw new Error(`Failed to fetch leaderboard (${res.status})`);
+  const json = await res.json();
+  const items = (json?.data ?? []) as any[];
+  return items.map((it, idx) => ({ rank: idx + 1, name: it?.name ?? it?.user_id ?? 'User', score: it?.score ?? 0 }));
+}
+
+export async function fetchSolves(): Promise<number[]> {
+  const res = await ctfdRequest(`/solves`);
+  if (!res.ok) return [];
+  const json = await res.json();
+  const solves = (json?.data ?? []) as any[];
+  return solves.map((s) => s.challenge_id);
+}
+
+// Local JSON storage for blogs & writeups via localStorage
+import blogsSeed from '@/data/blogs.json';
+import writeupsSeed from '@/data/writeups.json';
+
+const BLOGS_KEY = 'hv.blogs.v1';
+const WRITEUPS_KEY = 'hv.writeups.v1';
+
+function safeParse<T>(v: string | null, fallback: T): T {
+  try {
+    return v ? (JSON.parse(v) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export type Blog = { id: string; title: string; content: string; category?: string; author: string; createdAt: string };
+export type Writeup = { id: string; title: string; content: string; challengeId?: number; challengeName?: string; author: string; tags?: string[]; createdAt: string };
+
+export async function getBlogs(): Promise<Blog[]> {
+  const local = safeParse<Blog[]>(typeof window !== 'undefined' ? localStorage.getItem(BLOGS_KEY) : null, blogsSeed as any);
+  return local;
+}
+
+export async function addBlog(input: Omit<Blog, 'id' | 'createdAt'>): Promise<Blog> {
+  const current = await getBlogs();
+  const next: Blog = { ...input, id: `${Date.now()}`, createdAt: new Date().toISOString() };
+  const updated = [next, ...current];
+  if (typeof window !== 'undefined') localStorage.setItem(BLOGS_KEY, JSON.stringify(updated));
+  return next;
+}
+
+export async function getWriteups(): Promise<Writeup[]> {
+  const local = safeParse<Writeup[]>(typeof window !== 'undefined' ? localStorage.getItem(WRITEUPS_KEY) : null, writeupsSeed as any);
+  return local;
+}
+
+export async function addWriteup(input: Omit<Writeup, 'id' | 'createdAt'>): Promise<Writeup> {
+  const current = await getWriteups();
+  const next: Writeup = { ...input, id: `${Date.now()}`, createdAt: new Date().toISOString() };
+  const updated = [next, ...current];
+  if (typeof window !== 'undefined') localStorage.setItem(WRITEUPS_KEY, JSON.stringify(updated));
+  return next;
 }
 
 
